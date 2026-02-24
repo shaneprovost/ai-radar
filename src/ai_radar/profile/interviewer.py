@@ -62,8 +62,7 @@ def show_detection_summary(
     ))
 
     console.print()
-    console.print("[bold]The more detail you provide below, the more precisely ai-radar can filter trends")
-    console.print("and tailor suggestions to your actual workflow. Take 2 minutes — it pays off every week.[/bold]")
+    console.print("[bold]The more detail you provide below, the more precisely ai-radar can filter trends\nand tailor suggestions to your actual workflow. Take 2 minutes — it pays off every week.[/bold]")
     console.print()
 
 
