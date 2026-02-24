@@ -15,13 +15,20 @@ def render_digest(
     total_reviewed: int,
     sources_used: list[str],
     date: Optional[datetime] = None,
+    digest_dir: Optional[str] = None,
 ) -> Path:
     """Render digest markdown and write to file. Returns the file path."""
     if date is None:
         date = datetime.now()
 
-    DIGEST_DIR.mkdir(parents=True, exist_ok=True)
-    filename = DIGEST_DIR / f"{date.strftime('%Y-%m-%d')}.md"
+    # Use override directory if provided, otherwise fall back to profile config, then default
+    if digest_dir:
+        output_dir = Path(digest_dir).expanduser()
+    else:
+        output_dir = Path(profile.delivery.digest_dir).expanduser() if profile.delivery.digest_dir else DIGEST_DIR
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    filename = output_dir / f"{date.strftime('%Y-%m-%d')}.md"
 
     content = _build_markdown(suggestions, profile, total_reviewed, sources_used, date)
     filename.write_text(content, encoding="utf-8")

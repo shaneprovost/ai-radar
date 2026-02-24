@@ -101,7 +101,8 @@ def setup(skip_cron: bool, reconfigure: bool):
 @click.option("--test-slack", is_flag=True, help="Test Slack webhook without full digest")
 @click.option("--sources", default=None, help="Comma-separated source names (github_trending,hacker_news,rss)")
 @click.option("--dry-run", is_flag=True, help="Fetch and dedup only, skip LLM calls")
-def digest_cmd(force: bool, test_slack: bool, sources: Optional[str], dry_run: bool):
+@click.option("--digest-dir", default=None, help="Override digest output directory (default: from profile)")
+def digest_cmd(force: bool, test_slack: bool, sources: Optional[str], dry_run: bool, digest_dir: Optional[str]):
     """Fetch sources, curate with LLM, and generate personalized digest."""
     profile = load_profile()
     if profile is None:
@@ -183,7 +184,7 @@ def digest_cmd(force: bool, test_slack: bool, sources: Optional[str], dry_run: b
     total_reviewed = len(items)
     source_names = _get_source_names(items)
     from .delivery.markdown import render_digest
-    digest_path = render_digest(suggestions, profile, total_reviewed, source_names)
+    digest_path = render_digest(suggestions, profile, total_reviewed, source_names, digest_dir=digest_dir)
 
     console.print()
     console.print(f"[green bold]✓ Digest written to:[/green bold] {digest_path}")
