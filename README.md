@@ -13,16 +13,29 @@ Personalized AI trend radar CLI — filters 60+ weekly items down to ~10 that ge
 
 ## Install
 
+**Recommended — pipx** (installs into an isolated environment, keeps `ai-radar` available globally):
+
 ```bash
-pipx install ai-radar
+# Install pipx if you don't have it
+brew install pipx
+pipx ensurepath
+
+# Then install ai-radar
+pipx install git+https://github.com/shaneprovost/ai-radar
 ```
 
-Or from source:
+**Alternative — pip** (installs into your current Python/conda environment):
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-radar
+pip install git+https://github.com/shaneprovost/ai-radar
+```
+
+**From source** (for development):
+
+```bash
+git clone https://github.com/shaneprovost/ai-radar
 cd ai-radar
-pipx install -e .
+pip install -e .
 ```
 
 ## Usage
