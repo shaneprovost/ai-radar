@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-radar"
+version = "0.1.0"
+description = "Personalized AI trend radar — filters the noise, surfaces what matters to your workflow"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["ai", "trends", "cli", "productivity"]
+dependencies = [
+    "click>=8.1",
+    "pydantic>=2.5",
+    "litellm>=1.40",
+    "httpx>=0.27",
+    "feedparser>=6.0",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+    "python-dateutil>=2.9",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
+]
+
+[project.scripts]
+ai-radar = "ai_radar.cli:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_radar"]
+
+[tool.hatch.build]
+sources = ["src"]
