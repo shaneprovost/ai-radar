@@ -5,15 +5,32 @@ import logging
 import os
 import time
 
-# Suppress litellm's noisy output before importing it
-os.environ.setdefault("LITELLM_LOG", "ERROR")
-logging.getLogger("LiteLLM").setLevel(logging.ERROR)
-logging.getLogger("litellm").setLevel(logging.ERROR)
-
 logger = logging.getLogger(__name__)
 
 _MAX_RETRIES = 3
 _RETRY_DELAY = 2.0  # seconds, doubles each retry
+
+_PROVIDER_KEY_MAP = {
+    "anthropic": "ANTHROPIC_API_KEY",
+    "openai": "OPENAI_API_KEY",
+    "google": "GEMINI_API_KEY",
+}
+
+
+def _get_api_key(model: str) -> str | None:
+    """Resolve API key from environment based on model prefix."""
+    for prefix, env_var in _PROVIDER_KEY_MAP.items():
+        if model.startswith(prefix):
+            return os.environ.get(env_var)
+    return None
+
+
+def _suppress_litellm() -> None:
+    import litellm
+    litellm.suppress_debug_info = True
+    litellm.set_verbose = False
+    logging.getLogger("LiteLLM").setLevel(logging.ERROR)
+    logging.getLogger("litellm").setLevel(logging.ERROR)
 
 
 def call_llm(
@@ -24,7 +41,9 @@ def call_llm(
 ) -> str:
     """Synchronous LLM call with retry."""
     import litellm
+    _suppress_litellm()
 
+    api_key = _get_api_key(model)
     messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": user},
@@ -40,6 +59,7 @@ def call_llm(
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=0.3,
+                api_key=api_key,
             )
             return response.choices[0].message.content or ""
         except Exception as e:
@@ -64,7 +84,9 @@ async def call_llm_async(
 ) -> str:
     """Async LLM call with retry."""
     import litellm
+    _suppress_litellm()
 
+    api_key = _get_api_key(model)
     messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": user},
@@ -80,6 +102,7 @@ async def call_llm_async(
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=0.3,
+                api_key=api_key,
             )
             return response.choices[0].message.content or ""
         except Exception as e:
