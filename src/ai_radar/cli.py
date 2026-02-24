@@ -112,6 +112,9 @@ def digest_cmd(force: bool, test_slack: bool, sources: Optional[str], dry_run: b
         _test_slack(profile)
         return
 
+    # Pre-flight: verify API key is present
+    _check_api_key(profile)
+
     # Guard: last run < 6 hours ago
     run_state = load_run_state()
     if not force and run_state.get("last_run"):
@@ -358,6 +361,30 @@ def _get_source_names(items: list) -> list[str]:
             seen.add(item.source)
             result.append(item.source)
     return result[:5]
+
+
+def _check_api_key(profile: Profile) -> None:
+    """Verify the API key for the configured provider is present and looks valid."""
+    import os
+    key_map = {
+        "anthropic": "ANTHROPIC_API_KEY",
+        "openai": "OPENAI_API_KEY",
+        "google": "GEMINI_API_KEY",
+    }
+    provider = profile.llm.provider
+    env_var = key_map.get(provider, f"{provider.upper()}_API_KEY")
+    key = os.environ.get(env_var, "")
+
+    if not key:
+        console.print(f"\n[red bold]No API key found.[/red bold]")
+        console.print(f"Expected env var: [bold]{env_var}[/bold]")
+        console.print(f"Add it to your shell and re-run:\n")
+        console.print(f"  echo 'export {env_var}=\"your-key-here\"' >> ~/.zshrc")
+        console.print(f"  source ~/.zshrc")
+        console.print(f"  ai-radar digest --force\n")
+        sys.exit(1)
+
+    console.print(f"[green]✓[/green] {env_var} found (length: {len(key)}, prefix: {key[:12]}...)")
 
 
 def _test_slack(profile: Profile) -> None:
