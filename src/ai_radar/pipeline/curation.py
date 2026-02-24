@@ -33,12 +33,13 @@ def curate_items(
         scores = _parse_scores(response)
     except Exception as e:
         err = str(e)
-        if "authentication" in err.lower() or "invalid" in err.lower() and "key" in err.lower():
+        if "authentication" in err.lower() or ("invalid" in err.lower() and "key" in err.lower()):
             raise RuntimeError(
-                f"Invalid API key for {profile.llm.provider}. "
-                f"Set the correct key in your environment and re-run.\n"
+                f"Authentication failed for {profile.llm.model}. "
+                f"Ensure the correct API key is exported in your shell:\n"
                 f"  export ANTHROPIC_API_KEY='sk-ant-...'\n"
-                f"  source ~/.zshrc"
+                f"  source ~/.zshrc\n"
+                f"Then run: ai-radar update-profile  (to fix provider if it was set incorrectly)"
             ) from e
         logger.error(f"Curation LLM call failed: {e}")
         # Fallback: return items sorted by native score
