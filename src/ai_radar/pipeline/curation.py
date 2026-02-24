@@ -32,6 +32,14 @@ def curate_items(
         )
         scores = _parse_scores(response)
     except Exception as e:
+        err = str(e)
+        if "authentication" in err.lower() or "invalid" in err.lower() and "key" in err.lower():
+            raise RuntimeError(
+                f"Invalid API key for {profile.llm.provider}. "
+                f"Set the correct key in your environment and re-run.\n"
+                f"  export ANTHROPIC_API_KEY='sk-ant-...'\n"
+                f"  source ~/.zshrc"
+            ) from e
         logger.error(f"Curation LLM call failed: {e}")
         # Fallback: return items sorted by native score
         return sorted(items, key=lambda x: x.score, reverse=True)[:max_items]

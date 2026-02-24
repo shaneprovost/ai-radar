@@ -2,7 +2,13 @@
 from __future__ import annotations
 import asyncio
 import logging
+import os
 import time
+
+# Suppress litellm's noisy output before importing it
+os.environ.setdefault("LITELLM_LOG", "ERROR")
+logging.getLogger("LiteLLM").setLevel(logging.ERROR)
+logging.getLogger("litellm").setLevel(logging.ERROR)
 
 logger = logging.getLogger(__name__)
 
