@@ -271,8 +271,7 @@ def _interview_workflow_patterns(detected: list[WorkflowPattern]) -> list[Workfl
     # Ask for additional patterns
     console.print()
     console.print("   Any other repetitive workflows? (one per line, blank line to finish)")
-    console.print("   [dim]e.g. 'manually check 3 AWS accounts for errors every morning'")
-    console.print("   e.g. 'copy-paste Linear ticket IDs into every branch name'[/dim]")
+    console.print("   [dim]e.g. 'manually check 3 AWS accounts for errors every morning'\n   e.g. 'copy-paste Linear ticket IDs into every branch name'[/dim]")
     console.print()
 
     while True:
