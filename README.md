@@ -1,141 +1,114 @@
 # ai-radar
 
-Personalized AI trend radar CLI — filters 60+ weekly items down to ~10 that genuinely matter to your workflow.
+Personalized weekly AI digest — scans 60+ items from GitHub, Hacker News, and AI blogs, surfaces the ~10 that matter to your workflow.
 
-## What it does
+## Prerequisites
 
-- **Profiles your environment** once: detects Claude Code, MCPs, API keys, shell aliases, frameworks
-- **Fetches weekly** from GitHub Trending, Hacker News, and AI lab blogs/newsletters
-- **Curates with LLM**: scores each item for relevance to your specific stack and workflow
-- **Explains _why_** each item matters — and exactly how to adopt it — referencing your actual tools and commands
-- **Delivers** to `~/ai-radar/digests/YYYY-MM-DD.md` (configurable) + optional Slack DM
-- **Zero cloud dependencies** — runs entirely on your machine
+- macOS *(Linux/Windows: [see below](#linux--windows))*
+- Python 3.12+ — check: `python3 --version` — install from [python.org](https://python.org/downloads)
+- Homebrew — check: `brew --version` — install from [brew.sh](https://brew.sh)
+- An API key from one of:
 
-## Install
+  | Provider | Get your key | Environment variable |
+  |---|---|---|
+  | **Anthropic** (recommended) | [console.anthropic.com](https://console.anthropic.com) → API Keys | `ANTHROPIC_API_KEY` |
+  | OpenAI | [platform.openai.com](https://platform.openai.com) → API Keys | `OPENAI_API_KEY` |
+  | Google | [aistudio.google.com](https://aistudio.google.com) → Get API key | `GEMINI_API_KEY` |
 
-**Recommended — pipx** (installs into an isolated environment, keeps `ai-radar` available globally):
+---
+
+## Install & Setup (~5 minutes)
+
+**1. Save your API key** (replace the variable name and value with yours):
 
 ```bash
-# Install pipx if you don't have it
-brew install pipx
-pipx ensurepath
+echo 'export ANTHROPIC_API_KEY="your-key-here"' >> ~/.zshrc && source ~/.zshrc
+```
 
-# Then install ai-radar
+**2. Install:**
+
+```bash
+brew install pipx && pipx ensurepath
+```
+
+> Restart Terminal, then:
+
+```bash
 pipx install git+https://github.com/shaneprovost/ai-radar
 ```
 
-**Alternative — pip** (installs into your current Python/conda environment):
+**3. First-time setup:**
 
 ```bash
-pip install git+https://github.com/shaneprovost/ai-radar
+ai-radar setup
 ```
 
-**From source** (for development):
+Detects your environment, asks ~10 short questions about your role and interests, and optionally schedules a weekly digest every Monday at 8am.
+
+**4. Generate your first digest:**
 
 ```bash
-git clone https://github.com/shaneprovost/ai-radar
-cd ai-radar
-pip install -e .
+ai-radar digest
 ```
+
+Takes 1–2 minutes. Digest saved to `~/ai-radar/digests/YYYY-MM-DD.md`.
+
+---
 
 ## Usage
 
-```bash
-# First-time setup (detects environment, runs interview, installs cron)
-ai-radar setup
+After setup, digests run automatically each week. To run manually:
 
-# Generate digest manually
+```bash
 ai-radar digest
-
-# Force regenerate (bypass 6h guard)
-ai-radar digest --force
-
-# Generate digest to custom directory (overrides profile config)
-ai-radar digest --digest-dir ~/custom/path
-
-# Fetch only, skip LLM (useful for testing sources)
-ai-radar digest --dry-run
-
-# View your profile
-ai-radar show-profile
-
-# Update preferences
-ai-radar update-profile
-
-# List past digests
-ai-radar list-digests
 ```
 
-### Custom Digest Directory
+| Command | What it does |
+|---|---|
+| `ai-radar setup` | First-time setup |
+| `ai-radar digest` | Generate a digest now |
+| `ai-radar digest --force` | Bypass the 6-hour cooldown |
+| `ai-radar digest --dry-run` | Fetch sources, skip AI step |
+| `ai-radar digest --digest-dir ~/path` | Save to a custom folder |
+| `ai-radar show-profile` | View your current profile |
+| `ai-radar update-profile` | Update your preferences |
+| `ai-radar list-digests` | List past digests |
 
-By default, digests are saved to the directory configured in your profile (`~/.config/ai-radar/profile.yaml`). You can override this on a per-run basis:
+---
 
-```bash
-# One-time override
-ai-radar digest --digest-dir ~/Documents/ai-trends
+## Troubleshooting
 
-# Generate to multiple locations
-ai-radar digest --digest-dir ~/personal/ai-radar
-ai-radar digest --digest-dir ~/work/ai-trends --force
-```
+- **`ai-radar: command not found`** — Run `pipx ensurepath`, restart Terminal, try again
+- **API key not found** — Run `echo $ANTHROPIC_API_KEY`; if blank, redo step 1
+- **Digest looks generic** — Run `ai-radar update-profile` to fix your preferences
+- **Weekly runs don't fire** — System Settings → Privacy & Security → Full Disk Access → add `/usr/sbin/cron`
 
-**Priority order:**
+---
 
-1. `--digest-dir` command-line option (highest priority)
-2. `delivery.digest_dir` in profile config
-3. Default: `~/ai-radar/digests`
+## Linux / Windows
 
-## Requirements
+**Linux:** Same steps; replace `brew install pipx` with `pip install --user pipx`, and use `~/.bashrc` instead of `~/.zshrc`.
 
-- Python 3.12+
-- One of: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY`
+**Windows:** Set your API key in System Settings → Environment Variables. Automatic weekly scheduling is not supported; run `ai-radar digest` manually.
 
-## Configuration
+---
 
-| Path                                | Purpose                                       |
-| ----------------------------------- | --------------------------------------------- |
-| `~/.config/ai-radar/profile.yaml`   | Your profile (role, stack, workflow patterns) |
-| `~/.config/ai-radar/run-state.json` | Last run timestamp and stats                  |
-| `~/.config/ai-radar/run-digest.sh`  | Cron wrapper script                           |
-| `~/ai-radar/digests/`               | Generated digest files                        |
-| `~/ai-radar/logs/`                  | Cron run logs                                 |
+## Reference
 
-## Supported LLM Providers
+**Supported providers:**
 
-| Provider  | Default Model     |
-| --------- | ----------------- |
+| Provider | Default model |
+|---|---|
 | Anthropic | claude-sonnet-4-6 |
-| OpenAI    | gpt-4o            |
-| Google    | gemini-2.0-flash  |
+| OpenAI | gpt-4o |
+| Google | gemini-2.0-flash |
 
-Provider is auto-detected from available API keys during `ai-radar setup`.
+**Sources:** GitHub Trending · Hacker News (score ≥ 50) · Anthropic, OpenAI, DeepMind, Mistral blogs · TLDR AI · The Batch · Import AI · AI Breakfast
 
-## Sources
+**Config paths:**
 
-- **GitHub Trending** — top repos this week
-- **Hacker News** — AI/ML stories with score ≥ 50, past 7 days
-- **RSS feeds** — Anthropic, OpenAI, DeepMind, Mistral blogs + TLDR AI, The Batch, Import AI, AI Breakfast
-
-## Digest Format
-
-```
-# AI Radar — February 24, 2026
-
-> Personalized for: Engineering Manager (TypeScript/React, Claude Code + 9 MCPs)
-> Sources: GitHub Trending, Hacker News, 4 RSS feeds | Reviewed: 67 | Surfaced: 9
-
-## Must Look At
-### 1. [Item that directly addresses one of your workflow patterns]
-...
-
-## Worth Knowing
-...
-
-## FYI
-...
-```
-
-## macOS Cron Note
-
-If weekly runs don't fire, grant cron Full Disk Access:
-**System Settings → Privacy & Security → Full Disk Access → cron**
+| Path | Purpose |
+|---|---|
+| `~/.config/ai-radar/profile.yaml` | Your profile |
+| `~/ai-radar/digests/` | Generated digests |
+| `~/ai-radar/logs/` | Cron run logs |
