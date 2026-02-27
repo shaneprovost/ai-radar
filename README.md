@@ -8,7 +8,7 @@ Personalized AI trend radar CLI — filters 60+ weekly items down to ~10 that ge
 - **Fetches weekly** from GitHub Trending, Hacker News, and AI lab blogs/newsletters
 - **Curates with LLM**: scores each item for relevance to your specific stack and workflow
 - **Explains *why*** each item matters — and exactly how to adopt it — referencing your actual tools and commands
-- **Delivers** to `~/ai-radar/digests/YYYY-MM-DD.md` + optional Slack DM
+- **Delivers** to `~/ai-radar/digests/YYYY-MM-DD.md` (configurable) + optional Slack DM
 - **Zero cloud dependencies** — runs entirely on your machine
 
 ## Install
@@ -50,6 +50,9 @@ ai-radar digest
 # Force regenerate (bypass 6h guard)
 ai-radar digest --force
 
+# Generate digest to custom directory (overrides profile config)
+ai-radar digest --digest-dir ~/custom/path
+
 # Fetch only, skip LLM (useful for testing sources)
 ai-radar digest --dry-run
 
@@ -62,6 +65,24 @@ ai-radar update-profile
 # List past digests
 ai-radar list-digests
 ```
+
+### Custom Digest Directory
+
+By default, digests are saved to the directory configured in your profile (`~/.config/ai-radar/profile.yaml`). You can override this on a per-run basis:
+
+```bash
+# One-time override
+ai-radar digest --digest-dir ~/Documents/ai-trends
+
+# Generate to multiple locations
+ai-radar digest --digest-dir ~/personal/ai-radar
+ai-radar digest --digest-dir ~/work/ai-trends --force
+```
+
+**Priority order:**
+1. `--digest-dir` command-line option (highest priority)
+2. `delivery.digest_dir` in profile config
+3. Default: `~/ai-radar/digests`
 
 ## Requirements
 
