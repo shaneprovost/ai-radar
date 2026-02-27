@@ -7,7 +7,7 @@ name = "ai-radar"
 version = "0.1.0"
 description = "Personalized AI trend radar — filters the noise, surfaces what matters to your workflow"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 keywords = ["ai", "trends", "cli", "productivity"]
 dependencies = [
