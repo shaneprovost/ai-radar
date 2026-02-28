@@ -8,11 +8,17 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
 
 from . import __version__
-from .config.paths import PROFILE_PATH, DIGEST_DIR
+from .config.paths import CONFIG_DIR, PROFILE_PATH, DIGEST_DIR
+
+# Load .env files: config dir first (lower priority), then CWD (higher priority, overrides).
+load_dotenv(CONFIG_DIR / ".env")
+load_dotenv()  # CWD / walking upward
+
 from .profile.detector import detect_environment, detect_ai_tooling, detect_workflow_patterns
 from .profile.interviewer import show_detection_summary, run_interview
 from .profile.schema import Profile

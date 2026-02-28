@@ -35,9 +35,16 @@ def detect_environment() -> DetectedEnvironment:
     }
     env.languages = list({v for k, v in lang_candidates.items() if shutil.which(k)})
 
-    # Editors
-    editor_candidates = {"code": "VS Code", "cursor": "Cursor", "vim": "Vim", "nvim": "Neovim", "nano": "nano"}
-    env.editors = [v for k, v in editor_candidates.items() if shutil.which(k)]
+    # Editors — check PATH first, then macOS .app bundles
+    editor_candidates = {
+        "code": "VS Code", "cursor": "Cursor", "vim": "Vim", "nvim": "Neovim", "nano": "nano",
+        "idea": "IntelliJ IDEA", "pycharm": "PyCharm", "webstorm": "WebStorm",
+        "goland": "GoLand", "clion": "CLion", "rubymine": "RubyMine",
+        "phpstorm": "PhpStorm", "rider": "Rider", "datagrip": "DataGrip",
+    }
+    found_editors = {v for k, v in editor_candidates.items() if shutil.which(k)}
+    found_editors.update(_detect_macos_editors())
+    env.editors = sorted(found_editors)
 
     # Frameworks from package.json files
     frameworks, repos = _scan_repos()
@@ -105,6 +112,42 @@ def detect_workflow_patterns() -> list[WorkflowPattern]:
             unique.append(p)
 
     return unique
+
+
+def _detect_macos_editors() -> set[str]:
+    """Detect editors installed as macOS .app bundles (e.g. via JetBrains Toolbox)."""
+    app_name_map = {
+        "IntelliJ IDEA": "IntelliJ IDEA",
+        "PyCharm": "PyCharm",
+        "WebStorm": "WebStorm",
+        "GoLand": "GoLand",
+        "CLion": "CLion",
+        "RubyMine": "RubyMine",
+        "PhpStorm": "PhpStorm",
+        "Rider": "Rider",
+        "DataGrip": "DataGrip",
+        "Android Studio": "Android Studio",
+        "Visual Studio Code": "VS Code",
+        "Cursor": "Cursor",
+        "Zed": "Zed",
+    }
+    found: set[str] = set()
+    app_dirs = [Path("/Applications"), Path.home() / "Applications"]
+    for app_dir in app_dirs:
+        if not app_dir.is_dir():
+            continue
+        try:
+            for entry in app_dir.iterdir():
+                if not entry.suffix == ".app":
+                    continue
+                name = entry.stem  # e.g. "PyCharm" from "PyCharm.app"
+                for pattern, label in app_name_map.items():
+                    if pattern.lower() in name.lower():
+                        found.add(label)
+                        break
+        except (PermissionError, OSError):
+            pass
+    return found
 
 
 def _get_claude_version() -> Optional[str]:

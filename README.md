@@ -19,10 +19,16 @@ Personalized weekly AI digest — scans 60+ items from GitHub, Hacker News, and 
 
 ## Install & Setup (~5 minutes)
 
-**1. Save your API key** (replace the variable name and value with yours):
+**1. Save your API key** — either export it in your shell:
 
 ```bash
 echo 'export ANTHROPIC_API_KEY="your-key-here"' >> ~/.zshrc && source ~/.zshrc
+```
+
+Or create a `.env` file in the directory where you run `ai-radar` (or in `~/.config/ai-radar/.env`):
+
+```
+ANTHROPIC_API_KEY=your-key-here
 ```
 
 **2. Install:**
@@ -43,7 +49,11 @@ pipx install git+https://github.com/shaneprovost/ai-radar
 ai-radar setup
 ```
 
-Detects your environment, asks ~10 short questions about your role and interests, and optionally schedules a weekly digest every Monday at 8am.
+Detects your environment, asks ~10 short questions about your role and interests, and optionally schedules a weekly digest every Monday at 8am. To skip cron installation entirely:
+
+```bash
+ai-radar setup --skip-cron
+```
 
 **4. Generate your first digest:**
 
@@ -65,7 +75,8 @@ ai-radar digest
 
 | Command | What it does |
 |---|---|
-| `ai-radar setup` | First-time setup |
+| `ai-radar setup` | First-time setup (prompts for cron) |
+| `ai-radar setup --skip-cron` | Setup without installing cron |
 | `ai-radar digest` | Generate a digest now |
 | `ai-radar digest --force` | Bypass the 6-hour cooldown |
 | `ai-radar digest --dry-run` | Fetch sources, skip AI step |
@@ -78,10 +89,33 @@ ai-radar digest
 
 ## Troubleshooting
 
-- **`ai-radar: command not found`** — Run `pipx ensurepath`, restart Terminal, try again
-- **API key not found** — Run `echo $ANTHROPIC_API_KEY`; if blank, redo step 1
+- **`ai-radar: command not found`** — Run `pipx ensurepath`, restart Terminal, try again. For local dev, use `pipenv run ai-radar` or `pipenv shell` first
+- **API key not found** — Run `echo $ANTHROPIC_API_KEY`; if blank, add it to your shell profile or a `.env` file (see step 1)
 - **Digest looks generic** — Run `ai-radar update-profile` to fix your preferences
 - **Weekly runs don't fire** — System Settings → Privacy & Security → Full Disk Access → add `/usr/sbin/cron`
+
+---
+
+## Local Development
+
+```bash
+git clone https://github.com/shaneprovost/ai-radar && cd ai-radar
+pipenv install -e .
+```
+
+Then either activate the shell or use `pipenv run`:
+
+```bash
+pipenv shell
+ai-radar setup --skip-cron
+ai-radar digest
+```
+
+```bash
+pipenv run ai-radar digest --dry-run
+```
+
+API keys can go in a `.env` file at the repo root — it will be loaded automatically.
 
 ---
 
@@ -110,5 +144,6 @@ ai-radar digest
 | Path | Purpose |
 |---|---|
 | `~/.config/ai-radar/profile.yaml` | Your profile |
+| `~/.config/ai-radar/.env` | API keys (optional, alternative to shell export) |
 | `~/ai-radar/digests/` | Generated digests |
 | `~/ai-radar/logs/` | Cron run logs |
